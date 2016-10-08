@@ -1,0 +1,38 @@
+CMS/*
+@startuml
+autonumber
+title OIC Client Led Provisioning\n with a Single Service Provider
+participant "Provisioning Tool" as PT
+participant "New Device" as ND
+
+==Find Devices to Provision==
+note over PT, ND
+New Device is owned and supports client-led provisioning.
+end note
+PT->ND: GET /oic/sec/doxm?Owned="TRUE"
+ND->PT: RSP [{..., "Owned":"FALSE", "DidFormat":"0", "DeviceID":"uuid:A21C-E000-0000-0000",...}]
+PT->ND: GET /oic/sec/pstat
+ND->PT: RSP [{..., "Om":"bx0000,0011", ...}]
+
+
+==Provision Services Resources ==
+PT->ND: PUT /oic/sec/svc [{"svcid":"uuidAPS","svct":"oic.sec.aps", "sct":"bx0000,0001", "scid":"1", "ccid":"1", etc...},\n {"svcid":"uuidAMS","svct":"oic.sec.ams", "sct":"bx0000,0001", "scid":"2", "ccid":"2", etc...},\n {Etc...}]
+ND->PT: RSP 2.01
+PT->ND: PUT /oic/sec/pstat [{ ... Cm=bx0011,0000 ...}]
+ND->PT: RSP 2.04
+
+==Provision Credential Resources ==
+PT->ND: PUT /oic/sec/cred [{"SubjectID":"uuidAPS", "CredType":"<psk>", "PrivateData":"<psk>", etc...},\n {"SubjectID":"uuidAMS","CredType":"<psk>", "PrivateData":"<psk>", etc...}]
+ND->PT: RSP 2.01
+PT->ND: PUT /oic/sec/pstat [{ ... Cm=bx0010,0000 ...}]
+ND->PT: RSP 2.04
+
+==Provision ACL Resources ==
+PT->ND: GET /oic/sec/acl [{"Subject":"uuidD1","Resource":"/a/resource1", "Permission":"_RUD_", "Period":" ", "Recurrence":" ", "Rowner":"oic.sec.aps"},\n {"Subject":"uuidD2","Resource":"/a/resource2", "Permission":"_R___", ...},\n {Etc...}]
+ND->PT: RSP 2.01
+PT->ND: PUT /oic/sec/pstat [{ ... "Cm":"bx0000,0000", ... }]
+
+PT<->ND: Close DTLS Session
+
+@enduml
+*/

@@ -1,0 +1,25 @@
+/*
+@startuml
+autonumber
+title Device to Device Key Refresh Example
+participant "Device-1" as D1
+participant "Device-2" as D2
+
+==Find Devices to Provision==
+note over D1, D2
+Device-1 uses Diffie-Hellman key agreement to refresh an existing PSK with Device-2.
+end note
+D1->D2: Open a DTLS session with D2 using the pair-wise PSK
+D1->D1: Compute a new PSK1 = PRF(MasterSecret, "oic.sec.crs.dh_psk", "uuid:D100-0000-0000-0000", "uuid:D200-0000-0000-0000", "66") 
+D1->D1: Construct a /oic/sec/cred resource with PSK1 corresponding to D2.
+D2->D2: Compute the same value for PSK2
+D2->D2: Construct a /oic/sec/cred resource with PSK2 corresponding to D1.
+D1->D2: PUT /oic/sec/cred [{"CredID":"6", "DeviceID":"uuid:D100-0000-0000-0000", ..., "PrivateData":"PSK1", ...}]
+D2->D2: Verify PSK1 matches PSK2
+D2->D1: RSP /oic/sec/cred [{"CredID":"6", "DeviceID":"uuid:D200-0000-0000-0000", ..., "PrivateData":"PSK2", ...}]
+D1->D1: Verify PSK1 matches PSK2
+D1->D1: Update /oic/sec/cred with PSK1
+D1->D2: Close DTLS session
+D2->D2: Update /oic/sec/cred with PSK2
+@enduml
+*/

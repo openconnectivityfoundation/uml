@@ -1,0 +1,55 @@
+/*
+@startuml
+autonumber
+title Pair-wise Key Credential Creation using a CPS
+participant "Device1" as D1
+participant "Device2" as D1
+
+==Use a common CPS to obtain pair-wise keys==
+note over D1, D2
+Devices respectively request provisioning of a pairwise key.
+end note
+
+OT->ND: GET /oic/sec/doxm?Owned="FALSE"
+ND->OT: RSP [{"OxmType":"oic.sec.doxm.pin", "Oxm":"0", "Owned":"FALSE", "DidFormat":"0", "DeviceID":"uuid:A21C-E000-0000-0000",...}]
+OT->ND: POST /oic/sec/doxm [{... "OxmSel": "oic.sec.doxm.jw", ...}]
+ND->OT: RSP 2.04
+OT->ND: GET /oic/sec/pstat
+ND->OT: RSP [{"IsOp":"FALSE", "Cm":"bx0011,1110, "Tm":"bx0011,1110,"DeviceID":"", "Om":"bx0000,0001", "Sm":"bx0000,0011"}]
+
+==Perform oic.sec.doxm.pin method==
+OT->ND: ClientHello(TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA)
+ND->OT: HelloVerifyRequest(cookie)
+OT->ND: ClientHello(cookie)
+ND->OT: ServerHello(); ServerKeyExchange(ECDH PublicKey + ECC Curve Param); ServerHelloDone()
+note over OT, ND
+Compute PSK following RFC2898; PSK = PBKDF2(PRF, PIN, uuidND, c, DKlen)
+end note
+OT->ND: ClientKeyExchange(ECDH PublicKey); ChangeCipherSpec + Finish
+ND->OT:	ChangeCipherSpec + Finish
+note over OT, ND
+Both sides compute OwnerPSK
+end note
+OT->OT: OwnerPSK = PRF(MasterSecret, "uuid:B0B0-0000-0000-0000", "uuid:A21C-E000-0000-0000", "oic.sec.doxm.pin")
+ND->ND: OwnerPSK = PRF(...)
+ND->ND: /oic/sec/pstat.Cm=bx0011,1100
+
+
+==Use OwnerPSK to establish a secure provisioning channel ==
+OT<->ND: Open DTLS session with OwnerPSK as the PSK for TLS_PSK_... cipher suite
+note over OT, ND
+Use of OwnerPSK to construct DTLS session verifies both sides computed OwnerPSK correctly.
+end note
+ND->ND: /oic/sec/doxm.Owned="TRUE"
+note over OT, ND
+On-boarding tool tells new device how provisioning will be achieved.
+end note
+OT->ND: POST /oic/sec/doxm [{... "Om":"bx0000,0011", ...}]
+ND->OT: RSP 2.04
+note over OT, ND
+Provision the new device with resources.
+end note
+OT<->ND: Close DTLS Session
+
+@enduml
+*/

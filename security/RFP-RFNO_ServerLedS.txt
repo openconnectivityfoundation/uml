@@ -1,0 +1,40 @@
+/*
+@startuml
+autonumber
+title OIC Server Led Provisioning\n with a Single Service Provider
+participant "Provisioning Tool" as PT
+participant "New Device" as ND
+
+==Determine Self-provisioning is needed ==
+note over PT, ND
+Precondition: Device is owned and supports device-led provisioning
+end note
+ND->ND: Verify /oic/sec/doxm.Owned=TRUE
+ND->ND: Verify /oic/sec/doxm.Om=bx0000,0001
+ND->ND: Verify /oic/sec/pstat.Tm=bx0000,0000
+ND->ND: Verify /oic/sec/pstat.Cm=bx0011,1100
+
+==Begin Server Led Provisioning - Single Provisioning Service ==
+note over PT, ND
+New device obtains provisioning from provisioning services
+end note
+
+PT<->ND: Open as secure session with Provisioning Tool
+ND->PT: GET /oic/sec/svc
+PT->ND: RSP [{"svcid":"uuidBSS", "svct":"oic.sec.bss", "sct":"bx0000,0001", "scid":"0", "ccid":"0", etc...},\n {"svcid":"uuidAPS","svct":"oic.sec.aps", "sct":"bx0000,0001", "scid":"1", "ccid":"1", etc...},\n {"svcid":"uuidAMS","svct":"oic.sec.ams", "sct":"bx0000,0001", "scid":"2", "ccid":"2", etc...}]
+ND->ND: /oic/sec/pstat.Cm=bx0011,0000
+
+==Obtain Credential Resources for this Device==
+ND->PT: GET /oic/sec/cred
+PT->ND: RSP [{"CredID":"0", "SubjectID":"uuidBSS","RoleID":"","CredType":"1", Etc... },\n {"CredID":"1", "SubjectID":"uuidAPS","RoleID":"","CredType":"1",Etc... },\n {"CredID":"2", "SubjectID":"uuidAMS","RoleID":"","CredType":"1",Etc... },\n {"CredID":"3", "SubjectID":"uuidD1","RoleID":"","CredType":"1",Etc... },\n  {"CredID":"4", "SubjectID":"uuidD2","RoleID":"","CredType":"1",Etc... },\n { Etc...}]
+ND->ND: /oic/sec/pstat.Cm=bx0010,0000
+
+==Obtain ACL Resources for this Device==
+ND->PT: GET /oic/sec/acl
+PT->ND: RSP [{"Subject":"uuidD1","Resource":"/a/resource1", "Permission":"_RUD_", "Period":" ", "Recurrence":" ", "Rowner":"oic.sec.aps"},\n {"Subject":"uuidD2","Resource":"/a/resource2", "Permission":"_R___", ...},\n {Etc...}]
+ND->ND: /oic/sec/pstat.Cm=bx0000,0000 
+
+ND<->PT: Close DTLS Session
+
+@enduml
+*/

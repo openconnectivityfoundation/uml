@@ -1,0 +1,33 @@
+/*
+@startuml
+autonumber
+title OIC Device Owner Establishment Sequence \nA Vendor-specific Device Owner Transfer Method
+participant "On-boarding Tool" as OT
+participant "New Device" as ND
+
+==Device Owner Transfer Method==
+note over OT, ND
+Find new devices that are unowned and choose a vendor-specific owner transfer method
+end note
+OT->ND: GET /oic/sec/doxm?Owned="FALSE"
+ND->OT: RSP [{"OxmType":"oic.sec.doxm.<vendor-specific>", "Oxm":"0", "Owned":"FALSE", "DidFormat":"0", "DeviceID":"uuid:0000-0000-0000-0000",...}]
+OT->ND: POST /oic/sec/doxm [{... "OxmSel": "oic.sec.doxm.<vendor-specific>", ...}]
+ND->OT: RSP 2.04
+OT->ND: GET /oic/sec/pstat
+ND->OT: RSP [{"IsOp":"FALSE", "Cm":"bx0011,1110", "Tm":"bx0011,1110", "Om":"bx0000,0000", "Sm":"bx0000,0011"}]
+note over OT, ND
+On-boarding tool tells new device to allow client-directed provisioning.
+end note
+OT->ND: PUT /oic/sec/pstat [{...,"Om":"bx0000,0011", ...}]
+ND->OT: RSP 2.04
+
+==Perform vendor-specific method==
+
+
+==The secure session is used for the remainder of the owner transfer process==
+note over OT, ND
+This protocol follows the generic example transfer method - refer to the Example Owner Transfer Method.
+end note
+ 
+@enduml
+*/
