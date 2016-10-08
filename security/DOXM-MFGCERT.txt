@@ -9,33 +9,78 @@ participant "New Device" as ND
 note over OT, ND
 Find new devices that are unowned and choose the Mfg-Cert owner transfer method
 end note
-OT->ND: GET /oic/sec/doxm?Owned="FALSE"
-ND->OT: RSP [{"OxmType":"oic.sec.doxm.rdp", "Oxm":"0", "Owned":"FALSE", "DidFormat":"0", "DeviceID":"uuid:0000-0000-0000-0000",...}]
-OT->ND: POST /oic/sec/doxm [{... "OxmSel": "oic.sec.doxm.mfgcert", ...}]
+OT->ND: GET /oic/sec/doxm?owned="FALSE"
+ND->OT: RSP [{"oxm":["0","2"], "owned":"FALSE", "deviceuuid":"A21CXXXX-...",...}]
+OT->ND: POST /oic/sec/doxm [{..., "oxmsel":"2",...}]
 ND->OT: RSP 2.04
 OT->ND: GET /oic/sec/pstat
-ND->OT: RSP [{"IsOp":"FALSE", "Cm":"bx0011,1110, "Tm":"bx0011,1110,"Om":"bx0000,0000", "Sm":"bx0000,0011"}]
+ND->OT: RSP [{"isop":"FALSE", "cm":"bx0011,1110", "tm":"bx0011,1110", "om":"bx0000,0000", "sm":"bx0000,0011"}]
 note over OT, ND
 On-boarding tool tells new device how provisioning will be achieved.
 end note
-OT->ND: PUT /oic/sec/pstat [{...,"Om":"bx0000,0011", ...}]
+OT->ND: POST /oic/sec/pstat [{..., "om":"bx0000,0011",...}]
 ND->OT: RSP 2.04
 
 ==Perform oic.sec.doxm.mfgcert method==
 note over OT, ND
-The Mfg cert private key is used to sign handshake messages. Certificate attests device to OBT. If device requires authentication of the OBT, it will resolve the OBT certificate to its embedded trust anchor. Otherwise, it will implicitly trust the OBT.
+The Mfg cert private key is used to sign handshake messages. Certificate attests device to OBT.
 end note
-OT->ND: ClientHello(TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8_SHA256)
-ND->OT: HelloVerifyRequest(cookie)
-OT->ND: ClientHello(cookie); 
-ND->OT: ServerHello(); Certificate*, ServerKeyExchange(ECDH PublicKey + ECC Curve Param); ServerHelloDone()
-OT->ND: Certificate*, ClientKeyExchange(ECDH PublicKey); ChangeCipherSpec + Finish
-ND->OT:	ChangeCipherSpec + Finish
-
-==The secure session is used for the remainder of the owner transfer process==
 note over OT, ND
-This protocol follows the generic example transfer method - refer to the Example Owner Transfer Method.
+If device requires authentication of the OBT, it will resolve the OBT certificate to its embedded trust anchor. Otherwise, it will implicitly trust the OBT.
 end note
+group DTLS
+  OT->ND: ClientHello(TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8_SHA256)
+  ND->OT: HelloVerifyRequest(cookie)
+  OT->ND: ClientHello(TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8_SHA256,cookie)
+  ND->OT: ServerHello(TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8_SHA256)\nCertificate*\nServerKeyExchange(ECDH PublicKey + ECC Curve Param)\nServerHelloDone()
+  OT->ND: Certificate*\nClientKeyExchange(ECDH PublicKey)\nChangeCipherSpec + Finish
+  ND->OT:	ChangeCipherSpec + Finish
+end
+OT->ND: POST /oic/sec/doxm[{..., "devowneruuid":"B0B0XXXX-...",...}]
+ND->OT: RSP 2.04
+
+note over OT, ND
+The OBT decides which credential type(s) will be used to establish owner credentials
+end note
+
+newpage
+
+note over OT, ND
+If a symmetric credential type was selected, derive a symmetric key
+end note
+OT->OT: SharedKey = PRF(MasterSecret, "oic.sec.doxm.mfgcert", "uuid:B0B0XXXX-...", "uuid:A21CXXXX-...", "68")
+OT->OT: Generate /oic/sec/cred[{..., "credtype":"1", "subjectuuid":"A21CXXXX-...", "credid":"1",\n "privatedata":{"encoding":"oic.sec.encoding.raw", "data":h'<raw data of SharedKey>'},...}]
+OT->ND: POST /oic/sec/cred[{..., "credtype":"1", "subjectuuid":"B0B0XXXX-...", "credid":"1",\n "privatedata":{"encoding":"oic.sec.encoding.raw", "data":h'<empty>'},...}]
+ND->ND: Derive SharedKey Locally
+ND->ND: Replace the "privatedata" \nof received credential
+ND->OT: RSP 2.01
+note over OT, ND
+If an asymmetric or certificate credential type was selected, provision the OBT public key to the device and register the device's public key
+end note
+OT->ND: POST /oic/sec/cred[{..., "credtype":"32", "subjectuuid":"B0B0XXXX-...", "credid":"2",\n "publicdata":{"encoding":"oic.sec.encoding.pem", "data":"<owner-pub-key-pem>"},...}]
+ND->OT: RSP 2.01
+ND->ND: Generate Key Pair
+OT->ND: GET /oic/sec/cred?subjectuuid="A21CXXXX-..."
+ND->OT: RSP [{..., "credtype":"32", "subjectuuid":"A21CXXXX-...", "credid":"1",\n "publicdata":{"encoding":"oic.sec.encoding.pem", "data":"<device-pub-key-pem>"},...}]
+
+note over OT, ND
+If certificate credential type was selected, issue a device certificate to the new device
+end note
+OT<->ND: Perform asymmetric credential exchange above
+OT->ND: POST /oic/sec/cred[{..., "credtype":"8", "subjectuuid":"A21CXXXX-...", "credid":"2",\n "publicdata":{"encoding":"oic.sec.encoding.pem", "data":"<certificate-data-pem>"},...}]
+ND->OT: RSP 2.04
+
+note over OT, ND
+Update the owned status
+end note
+OT->ND: POST /oic/sec/doxm[{..., "owned:":"TRUE",...}]
+ND->OT: RSP 2.04
+OT->ND: POST /oic/sec/pstat[{..., "cm:":"bx0011,1100",...}]
+ND->OT: RSP 2.04
+OT->ND: POST /oic/sec/pstat[{..., "isop:":"TRUE",...}]
+ND->OT: RSP 2.04
+ND->OT: Close DTLS Session
+
 
 @enduml
 */
