@@ -36,7 +36,7 @@ group DTLS
   OT->ND: Certificate*\nClientKeyExchange(ECDH PublicKey)\nChangeCipherSpec + Finish
   ND->OT:	ChangeCipherSpec + Finish
 end
-OT->ND: POST /oic/sec/doxm[{..., "devowneruuid":"B0B0XXXX-...",...}]
+OT->ND: POST /oic/sec/doxm[{..., "devowner":"B0B0XXXX-...",...}]
 ND->OT: RSP 2.04
 
 note over OT, ND
