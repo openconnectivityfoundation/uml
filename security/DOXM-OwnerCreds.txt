@@ -8,7 +8,7 @@ participant "New Device\n(UUID A21Cxxxx-...)" as ND
 note over OT, ND
 If a symmetric credential type was selected, independently derive a shared symmetric key
 end note
-OT->OT: SharedKey = PRF (MasterSecret, "oic.sec.doxm.mfgcert", "uuid:B0B0XXXX-...", "uuid:A21CXXXX-...", "68")
+OT->OT: SharedKey = PRF (MasterSecret, "oic.sec.oxm.mfgcert", "uuid:B0B0XXXX-...", "uuid:A21CXXXX-...", "68")
 OT->OT: Generate /oic/sec/cred [{..., "credtype":"1", "subject":"A21CXXXX-...", "credid":"1",\n "privatedata":{"encoding":"oic.sec.encoding.raw", "data":h'<raw data of SharedKey>'},...}]
 OT->ND: POST /oic/sec/cred[{..., "credtype":"1", "subject":"B0B0XXXX-...", "credid":"1",\n "privatedata":{"encoding":"oic.sec.encoding.raw", "data":h'<empty>'},...}]
 ND->ND: Derive SharedKey Locally

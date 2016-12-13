@@ -1,38 +1,42 @@
 /*
 @startuml
 autonumber
-title OIC Device Owner Establishment Sequence \n"JustWorks" Device Owner Transfer Method
-participant "On-boarding Tool" as OT
-participant "New Device" as ND
+title OIC Device Owner Establishment Sequence \n"Just Works" Device Owner Transfer Method
+participant "On-boarding Tool\n(UUID B0B0xxxx-...)" as OT
+participant "New Device\n(UUID A21Cxxxx-...)" as ND
 
 ==Device Owner Transfer Method==
 note over OT, ND
-Find new devices that are unowned and choose the Just-Works owner transfer method
+Find new devices that are unowned and choose the Just Works owner transfer method
 end note
-OT->ND: GET /oic/sec/doxm?Owned="FALSE"
-ND->OT: RSP [{"OxmType":"oic.sec.doxm.jw", "Oxm":"0", "Owned":"FALSE", "DidFormat":"0", "DeviceID":"uuid:0000-0000-0000-0000",...}]
-OT->ND: POST /oic/sec/doxm [{... "OxmSel": "oic.sec.doxm.jw", ...}]
+OT->ND: GET /oic/sec/doxm?owned="FALSE"
+ND->OT: RSP [{"oxm":["0","2"], "owned":"FALSE", "deviceid":{"A21CXXXX-..."},...}]
+OT->ND: POST /oic/sec/doxm [{..., "oxmsel":"0",...}]
 ND->OT: RSP 2.04
 OT->ND: GET /oic/sec/pstat
-ND->OT: RSP [{"IsOp":"FALSE", "Cm":"bx0011,1110", "Tm":"bx0011,1110", "Om":"bx0000,0000", "Sm":"bx0000,0011"}]
+ND->OT: RSP [{"isop":"FALSE", "cm":"bx0011,1110", "tm":"bx0011,1100", "om":"bx0000,0000", "sm":"bx0000,0011"}]
 note over OT, ND
-On-boarding tool tells new device to allow client-directed provisioning.
+On-boarding tool tells new device how provisioning will be achieved.
 end note
-OT->ND: PUT /oic/sec/pstat [{...,"Om":"bx0000,0011", ...}]
+OT->ND: POST /oic/sec/pstat [{..., "om":"bx0000,0011",...}]
 ND->OT: RSP 2.04
 
-==Perform oic.sec.doxm.jw method==
-OT->ND: ClientHello(TLS_ECDH_anon_WITH_AES_128_CBC_SHA256)
-ND->OT: HelloVerifyRequest()
-OT->ND: ClientHello(cookie)
-ND->OT: ServerHello(); ServerKeyExchange(ECDH PublicKey + ECC Curve Param); ServerHelloDone()
-OT->ND: ClientKeyExchange(ECDH PublicKey); ChangeCipherSpec + Finish
-ND->OT:	ChangeCipherSpec + Finish
+==Perform oic.sec.oxm.jw method==
 
-==The secure session is used for the remainder of the owner transfer process==
+group DTLS
+  OT->ND: ClientHello(TLS_ECDHE_ANON_WITH_AES_128_CBC_SHA256)
+  ND->OT: HelloVerifyRequest(cookie)
+  OT->ND: ClientHello(TLS_ECDHE_ANON_WITH_AES_128_CBC_SHA256,cookie)
+  ND->OT: ServerHello(TLS_ECDHE_ANON_WITH_AES_128_CBC_SHA256)\nServerKeyExchange(ECDH PublicKey + ECC Curve Param)\nServerHelloDone()
+  OT->ND: ClientKeyExchange(ECDH PublicKey)\nChangeCipherSpec + Finish
+  ND->OT:	ChangeCipherSpec + Finish
+end
+OT->ND: POST /oic/sec/doxm[{..., "devowner":"B0B0XXXX-...",...}]
+ND->OT: RSP 2.04
+
 note over OT, ND
-This protocol follows the generic example transfer method - refer to the Example Owner Transfer Method.
+The OBT establishes owner credentials (see section "Assignment of Owner Credentials")
 end note
-
+ 
 @enduml
 */

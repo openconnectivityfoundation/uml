@@ -1,13 +1,13 @@
 /*
 @startuml
 autonumber
-title OIC Device Owner Establishment Sequence \n"MFG Cert" Device Owner Transfer Method
+title OIC Device Owner Establishment Sequence \n"Manufacturer Cert" Device Owner Transfer Method
 participant "On-boarding Tool\n(UUID B0B0xxxx-...)" as OT
 participant "New Device\n(UUID A21Cxxxx-...)" as ND
 
 ==Device Owner Transfer Method==
 note over OT, ND
-Find new devices that are unowned and choose the Mfg-Cert owner transfer method
+Find new devices that are unowned and choose the Manufacturer Cert owner transfer method
 end note
 OT->ND: GET /oic/sec/doxm?owned="FALSE"
 ND->OT: RSP [{"oxm":["0","2"], "owned":"FALSE", "deviceid":{"A21CXXXX-..."},...}]
@@ -21,9 +21,9 @@ end note
 OT->ND: POST /oic/sec/pstat [{..., "om":"bx0000,0011",...}]
 ND->OT: RSP 2.04
 
-==Perform oic.sec.doxm.mfgcert method==
+==Perform oic.sec.oxm.mfgcert method==
 note over OT, ND
-The Mfg cert private key is used to sign handshake messages. Certificate attests device to OBT.
+The Manufacturer cert private key is used to sign handshake messages. Certificate attests device to OBT.
 end note
 note over OT, ND
 If device requires authentication of the OBT, it will resolve the OBT certificate to its embedded trust anchor. Otherwise, it will implicitly trust the OBT.
