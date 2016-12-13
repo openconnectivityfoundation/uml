@@ -10,7 +10,7 @@ note over OT, ND
 Find new devices that are unowned and choose the Just Works owner transfer method
 end note
 OT->ND: GET /oic/sec/doxm?owned="FALSE"
-ND->OT: RSP [{"oxm":["0","2"], "owned":"FALSE", "deviceid":{"A21CXXXX-..."},...}]
+ND->OT: RSP [{"oxm":["0","2"], "owned":"FALSE", "deviceuuid":{"A21CXXXX-..."},...}]
 OT->ND: POST /oic/sec/doxm [{..., "oxmsel":"0",...}]
 ND->OT: RSP 2.04
 OT->ND: GET /oic/sec/pstat
