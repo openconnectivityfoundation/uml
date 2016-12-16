@@ -1,29 +1,29 @@
 /*
 @startuml
 autonumber
-title OIC Device Owner Establishment Sequence \n"MFG Cert" Device Owner Transfer Method
-participant "On-boarding Tool" as OT
-participant "New Device" as ND
+title OIC Device Owner Establishment Sequence \n"Manufacturer Cert" Device Owner Transfer Method
+participant "On-boarding Tool\n(UUID B0B0xxxx-...)" as OT
+participant "New Device\n(UUID A21Cxxxx-...)" as ND
 
 ==Device Owner Transfer Method==
 note over OT, ND
-Find new devices that are unowned and choose the Mfg-Cert owner transfer method
+Find new devices that are unowned and choose the Manufacturer Cert owner transfer method
 end note
 OT->ND: GET /oic/sec/doxm?owned="FALSE"
-ND->OT: RSP [{"oxm":["0","2"], "owned":"FALSE", "deviceuuid":"A21CXXXX-...",...}]
+ND->OT: RSP [{"oxms":["0","2"], "owned":"FALSE", "deviceuuid":{"A21CXXXX-..."},...}]
 OT->ND: POST /oic/sec/doxm [{..., "oxmsel":"2",...}]
 ND->OT: RSP 2.04
 OT->ND: GET /oic/sec/pstat
-ND->OT: RSP [{"isop":"FALSE", "cm":"bx0011,1110", "tm":"bx0011,1110", "om":"bx0000,0000", "sm":"bx0000,0011"}]
+ND->OT: RSP [{"isop":"FALSE", "cm":"bx0011,1110", "tm":"bx0011,1110", "om":"bx0000,0000", "sm":"bx0000,0110"}]
 note over OT, ND
 On-boarding tool tells new device how provisioning will be achieved.
 end note
-OT->ND: POST /oic/sec/pstat [{..., "om":"bx0000,0011",...}]
+OT->ND: POST /oic/sec/pstat [{..., "om":"bx0000,0100",...}]
 ND->OT: RSP 2.04
 
-==Perform oic.sec.doxm.mfgcert method==
+==Perform oic.sec.oxm.mfgcert method==
 note over OT, ND
-The Mfg cert private key is used to sign handshake messages. Certificate attests device to OBT.
+The Manufacturer cert private key is used to sign handshake messages. Certificate attests device to OBT.
 end note
 note over OT, ND
 If device requires authentication of the OBT, it will resolve the OBT certificate to its embedded trust anchor. Otherwise, it will implicitly trust the OBT.
@@ -36,51 +36,12 @@ group DTLS
   OT->ND: Certificate*\nClientKeyExchange(ECDH PublicKey)\nChangeCipherSpec + Finish
   ND->OT:	ChangeCipherSpec + Finish
 end
-OT->ND: POST /oic/sec/doxm[{..., "devowneruuid":"B0B0XXXX-...",...}]
+OT->ND: POST /oic/sec/doxm[{..., "devowner":"B0B0XXXX-...",...}]
 ND->OT: RSP 2.04
 
 note over OT, ND
-The OBT decides which credential type(s) will be used to establish owner credentials
+The OBT establishes owner credentials (see section "Assignment of Owner Credentials")
 end note
-
-newpage
-
-note over OT, ND
-If a symmetric credential type was selected, derive a symmetric key
-end note
-OT->OT: SharedKey = PRF(MasterSecret, "oic.sec.doxm.mfgcert", "uuid:B0B0XXXX-...", "uuid:A21CXXXX-...", "68")
-OT->OT: Generate /oic/sec/cred[{..., "credtype":"1", "subjectuuid":"A21CXXXX-...", "credid":"1",\n "privatedata":{"encoding":"oic.sec.encoding.raw", "data":h'<raw data of SharedKey>'},...}]
-OT->ND: POST /oic/sec/cred[{..., "credtype":"1", "subjectuuid":"B0B0XXXX-...", "credid":"1",\n "privatedata":{"encoding":"oic.sec.encoding.raw", "data":h'<empty>'},...}]
-ND->ND: Derive SharedKey Locally
-ND->ND: Replace the "privatedata" \nof received credential
-ND->OT: RSP 2.01
-note over OT, ND
-If an asymmetric or certificate credential type was selected, provision the OBT public key to the device and register the device's public key
-end note
-OT->ND: POST /oic/sec/cred[{..., "credtype":"32", "subjectuuid":"B0B0XXXX-...", "credid":"2",\n "publicdata":{"encoding":"oic.sec.encoding.pem", "data":"<owner-pub-key-pem>"},...}]
-ND->OT: RSP 2.01
-ND->ND: Generate Key Pair
-OT->ND: GET /oic/sec/cred?subjectuuid="A21CXXXX-..."
-ND->OT: RSP [{..., "credtype":"32", "subjectuuid":"A21CXXXX-...", "credid":"1",\n "publicdata":{"encoding":"oic.sec.encoding.pem", "data":"<device-pub-key-pem>"},...}]
-
-note over OT, ND
-If certificate credential type was selected, issue a device certificate to the new device
-end note
-OT<->ND: Perform asymmetric credential exchange above
-OT->ND: POST /oic/sec/cred[{..., "credtype":"8", "subjectuuid":"A21CXXXX-...", "credid":"2",\n "publicdata":{"encoding":"oic.sec.encoding.pem", "data":"<certificate-data-pem>"},...}]
-ND->OT: RSP 2.04
-
-note over OT, ND
-Update the owned status
-end note
-OT->ND: POST /oic/sec/doxm[{..., "owned:":"TRUE",...}]
-ND->OT: RSP 2.04
-OT->ND: POST /oic/sec/pstat[{..., "cm:":"bx0011,1100",...}]
-ND->OT: RSP 2.04
-OT->ND: POST /oic/sec/pstat[{..., "isop:":"TRUE",...}]
-ND->OT: RSP 2.04
-ND->OT: Close DTLS Session
-
-
+ 
 @enduml
 */

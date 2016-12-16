@@ -1,0 +1,51 @@
+/*
+@startuml
+autonumber
+title Owner Credential (OC) Assignment Sequence
+participant "On-boarding Tool\n(UUID B0B0xxxx-...)" as OT
+participant "New Device\n(UUID A21Cxxxx-...)" as ND
+
+note over OT, ND
+If a symmetric credential type was selected, independently derive a shared symmetric key
+end note
+OT->OT: SharedKey = PRF (MasterSecret, "oic.sec.oxm.mfgcert", "uuid:B0B0XXXX-...", "uuid:A21CXXXX-...", "68")
+OT->OT: Generate /oic/sec/cred [{..., "credtype":"1", "subjectuuid":"A21CXXXX-...", "credid":"1",\n "privatedata":{"encoding":"oic.sec.encoding.raw", "data":h'<raw data of SharedKey>'},...}]
+OT->ND: POST /oic/sec/cred[{..., "credtype":"1", "subjectuuid":"B0B0XXXX-...", "credid":"1",\n "privatedata":{"encoding":"oic.sec.encoding.raw", "data":h'<empty>'},...}]
+ND->ND: Derive SharedKey Locally
+ND->ND: Replace the "privatedata" \nof received credential
+ND->OT: RSP 2.01
+
+break
+
+autonumber 1
+
+note over OT, ND
+If an asymmetric or certificate credential type was selected, provision the OBT public key to the device and register the device's public key
+end note
+OT->ND: POST /oic/sec/cred [{..., "credtype":"32", "subjectuuid":"B0B0XXXX-...", "credid":"2",\n "publicdata":{"encoding":"oic.sec.encoding.pem", "data":"<owner-pub-key-pem>"},...}]
+ND->OT: RSP 2.01
+ND->ND: Generate Key Pair
+OT->ND: GET /oic/sec/cred?subjectuuid="A21CXXXX-..."
+ND->OT: RSP [{..., "credtype":"32", "subjectuuid":"A21CXXXX-...", "credid":"1",\n "publicdata":{"encoding":"oic.sec.encoding.pem", "data":"<device-pub-key-pem>"},...}]
+
+note over OT, ND
+If certificate credential type was selected, issue a device certificate to the new device
+end note
+OT<->ND: Perform asymmetric credential exchange above
+OT->ND: POST /oic/sec/cred [{..., "credtype":"8", "subjectuuid":"A21CXXXX-...", "credid":"2",\n "publicdata":{"encoding":"oic.sec.encoding.pem", "data":"<certificate-data-pem>"},...}]
+ND->OT: RSP 2.04
+
+note over OT, ND
+Update the owned status
+end note
+OT->ND: POST /oic/sec/doxm[{..., "owned:":"TRUE",...}]
+ND->OT: RSP 2.04
+OT->ND: POST /oic/sec/pstat[{..., "cm:":"bx0011,1100",...}]
+ND->OT: RSP 2.04
+OT->ND: POST /oic/sec/pstat[{..., "isop:":"TRUE",...}]
+ND->OT: RSP 2.04
+OT->ND: Close Secure Session
+OT->ND: Open Secure Session with new Owner Credentials
+
+@enduml
+*/
