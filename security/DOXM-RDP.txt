@@ -10,15 +10,15 @@ note over OT, ND
 Find new devices that are unowned and choose the Manufacturer Cert owner transfer method
 end note
 OT->ND: GET /oic/sec/doxm?owned="FALSE"
-ND->OT: RSP [{"oxm":["0","1"], "owned":"FALSE", "deviceuuid":{"A21CXXXX-..."},...}]
+ND->OT: RSP [{"oxms":["0","1"], "owned":"FALSE", "deviceuuid":{"A21CXXXX-..."},...}]
 OT->ND: POST /oic/sec/doxm [{..., "oxmsel":"1",...}]
 ND->OT: RSP 2.04
 OT->ND: GET /oic/sec/pstat
-ND->OT: RSP [{"isop":"FALSE", "cm":"bx0011,1110", "tm":"bx0011,1100", "om":"bx0000,0000", "sm":"bx0000,0011"}]
+ND->OT: RSP [{"isop":"FALSE", "cm":"bx0011,1110", "tm":"bx0011,1100", "om":"bx0000,0000", "sm":"bx0000,0110"}]
 note over OT, ND
 On-boarding tool tells new device how provisioning will be achieved.
 end note
-OT->ND: POST /oic/sec/pstat [{..., "om":"bx0000,0011",...}]
+OT->ND: POST /oic/sec/pstat [{..., "om":"bx0000,0100",...}]
 ND->OT: RSP 2.04
 
 ==Perform oic.sec.oxm.rdp method==
