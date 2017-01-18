@@ -29,10 +29,10 @@ note over OT, ND
 If device requires authentication of the OBT, it will resolve the OBT certificate to its embedded trust anchor. Otherwise, it will implicitly trust the OBT.
 end note
 group DTLS
-  OT->ND: ClientHello(TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8_SHA256)
+  OT->ND: ClientHello(TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8)
   ND->OT: HelloVerifyRequest(cookie)
-  OT->ND: ClientHello(TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8_SHA256,cookie)
-  ND->OT: ServerHello(TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8_SHA256)\nCertificate*\nServerKeyExchange(ECDH PublicKey + ECC Curve Param)\nServerHelloDone()
+  OT->ND: ClientHello(TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8,cookie)
+  ND->OT: ServerHello(TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8)\nCertificate*\nServerKeyExchange(ECDH PublicKey + ECC Curve Param)\nServerHelloDone()
   OT->ND: Certificate*\nClientKeyExchange(ECDH PublicKey)\nChangeCipherSpec + Finish
   ND->OT:	ChangeCipherSpec + Finish
 end
@@ -42,6 +42,6 @@ ND->OT: RSP 2.04
 note over OT, ND
 The OBT establishes owner credentials (see section "Assignment of Owner Credentials")
 end note
- 
+
 @enduml
 */
