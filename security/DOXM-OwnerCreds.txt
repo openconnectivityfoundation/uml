@@ -44,8 +44,10 @@ OT->ND: POST /oic/sec/pstat[{..., "cm:":"bx0011,1100",...}]
 ND->OT: RSP 2.04
 OT->ND: POST /oic/sec/pstat[{..., "isop:":"TRUE",...}]
 ND->OT: RSP 2.04
-OT->ND: Close Secure Session
-OT->ND: Open Secure Session with new Owner Credentials
+
+note over OT, ND
+Provision the new device with additional credentials for device management and device-to-device communications. 
+end note
 
 @enduml
 */
