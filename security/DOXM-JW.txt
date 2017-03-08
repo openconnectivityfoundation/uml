@@ -2,23 +2,16 @@
 @startuml
 autonumber
 title OIC Device Owner Establishment Sequence \n"Just Works" Device Owner Transfer Method
-participant "On-boarding Tool\n(UUID B0B0xxxx-...)" as OT
+participant "Onboarding Tool\n(UUID B0B0xxxx-...)" as OT
 participant "New Device\n(UUID A21Cxxxx-...)" as ND
 
 ==Device Owner Transfer Method==
 note over OT, ND
-Find new devices that are unowned and choose the Just Works owner transfer method
+Find new devices that are unowned and choose the Just Works owner transfer method.
 end note
 OT->ND: GET /oic/sec/doxm?owned="FALSE"
 ND->OT: RSP [{"oxms":["0","2"], "owned":"FALSE", "deviceuuid":{"A21CXXXX-..."},...}]
 OT->ND: POST /oic/sec/doxm [{..., "oxmsel":"0",...}]
-ND->OT: RSP 2.04
-OT->ND: GET /oic/sec/pstat
-ND->OT: RSP [{"isop":"FALSE", "cm":"bx0011,1110", "tm":"bx0011,1100", "om":"bx0000,0000", "sm":"bx0000,0110"}]
-note over OT, ND
-On-boarding tool tells new device how provisioning will be achieved.
-end note
-OT->ND: POST /oic/sec/pstat [{..., "om":"bx0000,0100",...}]
 ND->OT: RSP 2.04
 
 ==Perform oic.sec.oxm.jw method==
@@ -31,6 +24,28 @@ group DTLS
   OT->ND: ClientKeyExchange(ECDH PublicKey)\nChangeCipherSpec + Finish
   ND->OT:	ChangeCipherSpec + Finish
 end
+
+note over OT, ND
+Obtain doxm properties again, using the secure session.
+end note
+OT->ND: GET /oic/sec/doxm
+ND->OT: RSP [{"oxms":["0","2"], "owned":"FALSE", "deviceuuid":{"A21CXXXX-..."},...}]
+note over OT, ND
+The OBT verifies the doxm properties match those retrieved before the secure connection
+was established. A mismatch in property values is treated as an authentication error.
+end note
+
+note over OT, ND
+Onboarding tool tells new device how provisioning will be achieved.
+end note
+OT->ND: GET /oic/sec/pstat
+ND->OT: RSP [{"isop":"FALSE", "cm":"bx0011,1110", "tm":"bx0011,1100", "om":"bx0000,0000", "sm":"bx0000,0110"}]
+OT->ND: POST /oic/sec/pstat [{..., "om":"bx0000,0100",...}]
+ND->OT: RSP 2.04
+
+note over OT, ND
+Onboarding tool posts the device owner ID.
+end note
 OT->ND: POST /oic/sec/doxm[{..., "devowner":"B0B0XXXX-...",...}]
 ND->OT: RSP 2.04
 
