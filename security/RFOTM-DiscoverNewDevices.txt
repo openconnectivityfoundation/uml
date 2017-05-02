@@ -1,0 +1,17 @@
+/*
+@startuml
+autonumber
+title Discover New Devices Sequence
+participant "Onboarding Device\n(UUID B0Bxxxxx-...)" as OT
+participant "New Device\n(UUID A71C3xxx-...)" as ND
+
+group Discover New Devices
+note over OT, ND
+Find new devices that are unowned. Device identifier may be obfuscated for privacy (not show).
+end note
+OT->ND: GET /oic/sec/doxm?owned=FALSE
+ND->OT: RSP {...,"oxms":[0,1,2,...], "owned":FALSE, "deviceuuid":"A71C3xxx-...}
+end
+
+@enduml
+*/

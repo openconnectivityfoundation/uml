@@ -1,0 +1,42 @@
+/*
+@startuml
+autonumber
+title Owner Credential (OC) Assignment Sequence
+participant "On-boarding Device\n(UUID B0B0XXXX-...)" as OT
+participant "New Device\n(UUID A71C3XXX-...)" as ND
+
+group Configure Device Services
+autonumber 1
+note over OT, ND
+Assign valid "rowneruuid" to security resources.
+end note
+OT->ND: POST /oic/sec/doxm {..., "rowneruuid":"B0B0XXXX-..."}
+ND->OT: RSP 2.04
+OT->ND: POST /oic/sec/pstat {..., "rowneruuid":"B0B0XXXX-..."}
+ND->OT: RSP 2.04
+OT->ND: POST /oic/sec/cred {..., "rowneruuid":"C85XXXX-..."}
+ND->OT: RSP 2.04
+OT->ND: POST /oic/sec/acl2 {..., "rowneruuid":"A85XXXX-..."}
+ND->OT: RSP 2.04
+
+note over OT, ND
+Provision the new device with credentials for CMS credential management.
+end note
+OT->ND: POST /oic/sec/cred {"creds":[{..., "credtype":3", "subjectuuid":"C85XXXX-...", "credid":3,\n "publicdata":{"encoding":"oic.sec.encoding.pem", "data":"<owner-pub-key-pem>"},...}],...}
+ND->OT: RSP 2.04
+
+note over OT, ND
+Provision the new device with credentials for AMS access management.
+end note
+OT->ND: POST /oic/sec/cred {"creds":[{..., "credtype":3", "subjectuuid":"A85XXXX-...", "credid":4,\n "publicdata":{"encoding":"oic.sec.encoding.pem", "data":"<owner-pub-key-pem>"},...}],...}
+ND->OT: RSP 2.04
+
+note over OT, ND
+Update the owned status. Device is now ready to move to provisioning and "RFPRO" state.
+end note
+OT->ND: POST /oic/sec/doxm[{"owned":TRUE}]
+ND->OT: RSP 2.04
+
+
+@enduml
+*/

@@ -1,47 +1,34 @@
 /*
 @startuml
 autonumber
-title OIC Device Owner Establishment Sequence \n"Manufacturer Cert" Device Owner Transfer Method
-participant "On-boarding Tool\n(UUID B0B0xxxx-...)" as OT
-participant "New Device\n(UUID A21Cxxxx-...)" as ND
+title Perform Manufacturer Certificate Owner Transfer Method
+participant "Onboarding Device\n(UUID B0Bxxxxx-...)" as OT
+participant "New Device\n(UUID A71C3xxx-...)" as ND
 
-==Device Owner Transfer Method==
+group Execute Manufacturer Certificate Owner Transfer Method
 note over OT, ND
-Find new devices that are unowned and choose the Manufacturer Cert owner transfer method
+Onboarding device selects the oic.sec.oxm.mfgcert owner transfer method and executes it.
 end note
-OT->ND: GET /oic/sec/doxm?owned="FALSE"
-ND->OT: RSP [{"oxms":["0","2"], "owned":"FALSE", "deviceuuid":{"A21CXXXX-..."},...}]
-OT->ND: POST /oic/sec/doxm [{..., "oxmsel":"2",...}]
-ND->OT: RSP 2.04
-OT->ND: GET /oic/sec/pstat
-ND->OT: RSP [{"isop":"FALSE", "cm":"bx0011,1110", "tm":"bx0011,1110", "om":"bx0000,0000", "sm":"bx0000,0110"}]
-note over OT, ND
-On-boarding tool tells new device how provisioning will be achieved.
-end note
-OT->ND: POST /oic/sec/pstat [{..., "om":"bx0000,0100",...}]
+
+OT->ND: POST /oic/sec/doxm {...,"oxmsel":2,...}
 ND->OT: RSP 2.04
 
-==Perform oic.sec.oxm.mfgcert method==
 note over OT, ND
-The Manufacturer cert private key is used to sign handshake messages. Certificate attests device to OBT.
+The Manufacturer cert private key is used to sign handshake messages. Certificate attests the device manufacturer and static device attributes.
 end note
+
 note over OT, ND
-If device requires authentication of the OBT, it will resolve the OBT certificate to its embedded trust anchor. Otherwise, it will implicitly trust the OBT.
+If device requires authentication of the on boarding device, it will resolve the on boarding device certificate to its embedded trust anchor. Otherwise, it will implicitly trust it.
 end note
-group DTLS
-  OT->ND: ClientHello(TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8)
-  ND->OT: HelloVerifyRequest(cookie)
-  OT->ND: ClientHello(TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8,cookie)
-  ND->OT: ServerHello(TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8)\nCertificate*\nServerKeyExchange(ECDH PublicKey + ECC Curve Param)\nServerHelloDone()
-  OT->ND: Certificate*\nClientKeyExchange(ECDH PublicKey)\nChangeCipherSpec + Finish
-  ND->OT:	ChangeCipherSpec + Finish
+
+OT->ND: ClientHello(TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8)
+ND->OT: HelloVerifyRequest(cookie)
+OT->ND: ClientHello(TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8,cookie)
+ND->OT: ServerHello(TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8)\nCertificate*\nServerKeyExchange(ECDH PublicKey + ECC Curve Param)\nServerHelloDone()
+OT->ND: Certificate*\nClientKeyExchange(ECDH PublicKey)\nChangeCipherSpec + Finish
+ND->OT:	ChangeCipherSpec + Finish
+
 end
-OT->ND: POST /oic/sec/doxm[{..., "devowner":"B0B0XXXX-...",...}]
-ND->OT: RSP 2.04
-
-note over OT, ND
-The OBT establishes owner credentials (see section "Assignment of Owner Credentials")
-end note
 
 @enduml
 */

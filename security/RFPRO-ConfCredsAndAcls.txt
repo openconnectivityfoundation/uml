@@ -1,0 +1,51 @@
+/*
+@startuml
+autonumber
+title Provision New Device for Peer-peer Interactions Sequence
+participant "CMS Device\n(UUID C85XXXXX-...)" as CM
+participant "AMS Device\n(UUID A85XXXXX-...)" as AM
+participant "New Device\n(UUID A71C3XXX-...)" as ND
+participant "Peer Device\n(UUID CA401XXX-...)" as PE
+
+group Prepare for Peer Device Interactions
+autonumber 1
+
+note over CM, ND
+Enable ready-for-provisioning device state.
+end note
+CM->ND: POST /oic/sec/pstat[{"dos":{"s":2}}]
+ND->CM: RSP 2.04
+CM->PE: POST /oic/sec/pstat[{"dos":{"s":2}}]
+PE->CM: RSP 2.04
+
+note over CM, ND
+Provision the new device with credentials to access a peer device ("CA401XXX-...").
+end note
+
+CM->ND: POST /oic/sec/cred {"creds":[{..., "credtype":3", "subjectuuid":"CA401XXX-...", "credid":5,\n "publicdata":{"encoding":"oic.sec.encoding.pem", "data":"<owner-pub-key-pem>"},...}],...}
+ND->CM: RSP 2.04
+CM->PE: POST /oic/sec/cred {"creds":[{..., "credtype":3", "subjectuuid":"A71C3XXX-...", "credid":5,\n "publicdata":{"encoding":"oic.sec.encoding.pem", "data":"<owner-pub-key-pem>"},...}],...}
+PE->CM: RSP 2.04
+
+note over AM, ND
+Provision the new device with access control entries to access a peer device ("CA401XXX-...").
+end note
+
+AM->ND: POST /oic/sec/acl2 {"aclist2": [...,{"subject":"uuid":"CA401XXX-...", "Permission":6, "resources":["rt":"x.a.b.c"]},...],...} 
+ND->AM: RSP 2.04
+AM->PE: POST /oic/sec/acl2 {"aclist2": [...,{"subject":"uuid":"A71C3XXX-...", "Permission":6, "resources":["rt":"x.a.b.c"]},...],...} 
+PE->AM: RSP 2.04
+
+note over AM, ND
+Enable ready-for-normal-operation device state.
+end note
+
+AM->ND: POST /oic/sec/pstat[{"dos":{"s":3}}]
+ND->AM: RSP 2.04
+AM->PE: POST /oic/sec/pstat[{"dos":{"s":3}}]
+PE->AM: RSP 2.04
+
+end
+
+@enduml
+*/
