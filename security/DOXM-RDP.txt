@@ -1,62 +1,30 @@
 /*
 @startuml
 autonumber
-title OIC Device Owner Establishment Sequence \n"Random PIN" Device Owner Transfer Method
-participant "Onboarding Tool\n(UUID B0B0xxxx-...)" as OT
-participant "New Device\n(UUID A21Cxxxx-...)" as ND
+title Perform Random PIN Device Owner Transfer Method
+participant "Onboarding Device\n(UUID B0Bxxxxx-...)" as OT
+participant "New Device\n(UUID A71C3xxx-...)" as ND
 
-==Device Owner Transfer Method==
+group Execute Manufacturer Certificate Owner Transfer Method
 note over OT, ND
-Find new devices that are unowned and choose the Random PIN owner transfer method.
+Onboarding device selects the oic.sec.oxm.rdp owner transfer method and executes it.
 end note
-OT->ND: GET /oic/sec/doxm?owned="FALSE"
-ND->OT: RSP [{"oxms":["0","1"], "owned":"FALSE", "deviceuuid":{"A21CXXXX-..."},...}]
-OT->ND: POST /oic/sec/doxm [{..., "oxmsel":"1",...}]
+
+OT->ND: POST /oic/sec/doxm {...,"oxmsel":1,...}
 ND->OT: RSP 2.04
 
-==Perform oic.sec.oxm.rdp method==
-
-group DTLS
-  OT->ND: ClientHello(TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256)
-  ND->OT: HelloVerifyRequest(cookie)
-  OT->ND: ClientHello(TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256,cookie)
-  ND->OT: ServerHello(TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256)\nServerKeyExchange(ECDH PublicKey + ECC Curve Param)\nServerHelloDone()
+OT->ND: ClientHello(TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256)
+ND->OT: HelloVerifyRequest(cookie)
+OT->ND: ClientHello(TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256,cookie)
+ND->OT: ServerHello(TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256)\nServerKeyExchange(ECDH PublicKey + ECC Curve Param)\nServerHelloDone()
 
 note over OT, ND
 Compute PPSK following RFC 2898: PPSK = PBKDF2(PRF, PIN, NewDeviceID, c, DkLen)
 end note
 
-  OT->ND: ClientKeyExchange(ECDH PublicKey)\nChangeCipherSpec + Finish
-  ND->OT:	ChangeCipherSpec + Finish
+OT->ND: ClientKeyExchange(ECDH PublicKey)\nChangeCipherSpec + Finish
+ND->OT:	ChangeCipherSpec + Finish
 end
-
-note over OT, ND
-Obtain doxm properties again, using the secure session.
-end note
-OT->ND: GET /oic/sec/doxm
-ND->OT: RSP [{"oxms":["0","1"], "owned":"FALSE", "deviceuuid":{"A21CXXXX-..."},...}]
-note over OT, ND
-The OBT verifies the doxm properties match those retrieved before the authenticated connection
-was established. A mismatch in property values is treated as an authentication error.
-end note
-
-note over OT, ND
-Onboarding tool tells new device how provisioning will be achieved.
-end note
-OT->ND: GET /oic/sec/pstat
-ND->OT: RSP [{"isop":"FALSE", "cm":"bx0011,1110", "tm":"bx0011,1100", "om":"bx0000,0000", "sm":"bx0000,0110"}]
-OT->ND: POST /oic/sec/pstat [{..., "om":"bx0000,0100",...}]
-ND->OT: RSP 2.04
-
-note over OT, ND
-Onboarding tool posts the device owner ID.
-end note
-OT->ND: POST /oic/sec/doxm[{..., "devowner":"B0B0XXXX-...",...}]
-ND->OT: RSP 2.04
-
-note over OT, ND
-The OBT establishes owner credentials (see section "Assignment of Owner Credentials")
-end note
  
 @enduml
 */

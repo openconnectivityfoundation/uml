@@ -1,0 +1,19 @@
+/*
+@startuml
+autonumber
+title Perform Vendor Specific Device Owner Transfer Method
+participant "Onboarding Device\n(UUID B0Bxxxxx-...)" as OT
+participant "New Device\n(UUID A71C3xxx-...)" as ND
+
+group Execute Vendor Specific Owner Transfer Method
+note over OT, ND
+Onboarding device selects the oic.sec.oxm.<0xFF00 - 0xFFFF> owner transfer method and executes it.
+end note
+
+OT->ND: POST /oic/sec/doxm {"oxmsel":0XFF00}
+ND->OT: RSP 2.04
+OT<->ND: Do vendor specific owner transfer method.
+end
+
+@enduml
+*/

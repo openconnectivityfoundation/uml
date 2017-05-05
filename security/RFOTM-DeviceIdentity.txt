@@ -1,0 +1,52 @@
+/*
+@startuml
+autonumber
+title Establish Device Identity
+participant "On-boarding Device\n(UUID B0B0XXXX-...)" as OT
+participant "New Device\n(UUID A71C3XXX-...)" as ND
+
+group Establish Device Identifiers
+note over OT, ND
+Re-read owner transfer methods using the secure session and verify it is the same that was executed.
+end note
+
+OT->ND: GET /oic/sec/doxm
+ND->OT: RSP {...,"oxms":[0,1,2,...],"owned":FALSE,...}
+
+note over OT, ND
+The on boarding device verifies the doxm properties match those retrieved before the secure connection
+was established. A mismatch in property values is treated as an authentication error.
+end note
+note over OT, ND
+Remember the device identifier in case it was obfuscated for anonymous devices.
+end note
+note over OT, ND
+Verify device supports Client-Directed provisioning, is in "RFOTM" state, and no device state change is pending. 
+end note
+
+note over OT, ND
+Onboarding device tells new device how provisioning will be achieved.
+end note
+
+OT->ND: GET /oic/sec/pstat
+ND->OT: RSP {...,"dos":{"s":1,"p":FALSE}, "sm":0bXXXX,X1XX,...}
+OT->ND: POST /oic/sec/pstat {...,"om":0b0000,0100,...}
+ND->OT: RSP 2.04
+
+note over OT, ND
+Onboarding device posts the device owner UUID.
+end note
+
+OT->ND: POST /oic/sec/doxm {...,"devowneruuid":"B0Bxxxxx-..."},...}
+ND->OT: RSP 2.04
+
+note over OT, ND
+Onboarding device re-reads /doxm to get the new device's persistent UUID.
+end note
+
+OT->ND: GET /oic/sec/doxm
+ND->OT: RSP {...,"deviceuuid":"A71C3XXX-...",...}
+
+end
+@enduml
+*/

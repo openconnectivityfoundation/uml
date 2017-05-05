@@ -1,0 +1,74 @@
+/*
+@startuml
+autonumber
+title Summary of Onboarding Process
+participant "On-boarding Device\n(UUID B0B0XXXX-...)" as OT
+participant "CMS Device\n(UUID C85XXXXX-...)" as CM
+participant "AMS Device\n(UUID A85XXXXX-...)" as AM
+participant "New Device\n(UUID A71C3XXX-...)" as ND
+
+group Discover New Devices
+note over OT, ND
+Discover new devices (not owned) and find a suitable owner transfer method.
+end note
+
+OT->ND: Discover unowned devices.
+ND->OT: Return supported owner transfer methods.
+end
+break
+
+group Execute Owner Transfer Method
+OT->ND: Select the owner transfer method.
+OT<->ND: Perform the owner transfer handshake.
+end
+break
+
+group Establish Device Identity
+OT<->ND: Re-read device identifier and provision owner identity
+end
+break
+
+group Establish Owner Credentials
+note over OT, ND
+Decide whether to use a symmetric and/or asymmetric credentials used by the device owner.
+end note
+OT->ND: Request the type of credentials supported by the new device.
+OT->OT: Decide with credentials to use.
+group Provision Symmetric Owner Credential
+OT->ND: Provision symmetric owner credential.
+end
+group Provision Asymmetric Owner Credential
+OT->ND: Provision asymmetric owner credential.
+end
+end
+break
+
+group Configure Device Services
+note over OT, ND
+Define device and delegate management services such as AMS, CMS and DOXS.
+end note
+OT->ND: Provision the DOXS service by setting the resource owner for /doxm and /pstat
+OT->ND: Provision the AMS service by setting the resource owner for /acl2
+OT->ND: Provision the CMS service by setting the resource owner for /cred
+OT->ND:	Provision the AMS credential.
+OT->ND: Provision the CMS credential.
+OT->ND: Set the device owned property to TRUE.
+end
+break
+
+group Prepare for Peer Device Interactions
+note over CM, ND
+Provision the new device with peer credentials and access control policies.
+end note
+CM->ND: Change device state to ready-for-provisioning.
+CM->ND: CMS provisions credentials to the new device and peer devices.
+AM->ND: AMS provisions access control entries to the new device and peer devices.
+
+note over AM, ND
+Enable the device to operate normally.
+end note
+AM->ND: Change device state to ready-for-normal-operation.
+end
+
+@enduml
+*/
