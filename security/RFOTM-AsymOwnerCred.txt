@@ -2,8 +2,8 @@
 @startuml
 autonumber
 title Owner Credential (OC) Assignment Sequence
-participant "On-boarding Device\n(UUID B0B0XXXX-...)" as OT
-participant "New Device\n(UUID A71C3XXX-...)" as ND
+participant "On-boarding Device\n(UUID B0Bxxxxx-...)" as OT
+participant "New Device\n(UUID A71C3xxx-...)" as ND
 
 group Asymmetric Owner Credential
 autonumber 1
@@ -11,17 +11,17 @@ autonumber 1
 note over OT, ND
 Provision the on-boarding device's public key and register the device's public key. (If using asymmetric credentials)
 end note
-OT->ND: POST /oic/sec/cred {"creds":[{..., "credtype":3", "subjectuuid":"B0B0XXXX-...", "credid":2,\n "publicdata":{"encoding":"oic.sec.encoding.pem", "data":"<owner-pub-key-pem>"},...}],...}
+OT->ND: POST /oic/sec/cred {"creds":[{..., "credtype":3", "subjectuuid":"B0Bxxxxx-...", "credid":2,\n "publicdata":{"encoding":"oic.sec.encoding.pem", "data":"<owner-pub-key-pem>"},...}],...}
 ND->OT: RSP 2.04
 ND->ND: Generate Key Pair
-OT->ND: GET /oic/sec/cred?subjectuuid="A71C3XXX-..."
+OT->ND: GET /oic/sec/cred?subjectuuid="A71C3xxx-..."
 ND->OT: RSP {"creds":[{..., "credtype":32, "subjectuuid":"A71C3XXX-...", "credid":1,\n "publicdata":{"encoding":"oic.sec.encoding.pem", "data":"<device-pub-key-pem>"},...}],...}
 
 note over OT, ND
 If certificate credential type was selected, issue a device certificate to the new device
 end note
 OT<->ND: Perform asymmetric credential exchange above
-OT->ND: POST /oic/sec/cred {"creds":[{..., "credtype":8, "subjectuuid":"A71C3XXX-...", "credid":2,\n "publicdata":{"encoding":"oic.sec.encoding.pem", "data":"<certificate-data-pem>"},...}], "rowneruuid":"00000000-..."}
+OT->ND: POST /oic/sec/cred {"creds":[{..., "credtype":8, "subjectuuid":"A71C3xxx-...", "credid":2,\n "publicdata":{"encoding":"oic.sec.encoding.pem", "data":"<certificate-data-pem>"},...}], "rowneruuid":"00000000-..."}
 ND->OT: RSP 2.04
 end
 

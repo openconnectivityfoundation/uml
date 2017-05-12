@@ -2,15 +2,15 @@
 @startuml
 autonumber
 title Establish Owner Credentials Sequence
-participant "On-boarding Device\n(UUID B0B0XXXX-...)" as OT
-participant "New Device\n(UUID A71C3XXX-...)" as ND
+participant "On-boarding Device\n(UUID B0B0xxx-...)" as OT
+participant "New Device\n(UUID A71C3xxx-...)" as ND
 
 group Establish Owner Credentials
 note over OT, ND
 Discover which credential types are supported by the new device.
 end note
 
-OT->ND: GET OT->ND: GET /oic/sec/doxm
+OT->ND: GET /oic/sec/doxm
 ND->OT: RSP {...,"sct":[1,2,4,8,16,32,...],...}
 OT->OT: Select pair-wise symmetric key credential type.
 group See UML Diagram: Provision Symmetric Owner Credential

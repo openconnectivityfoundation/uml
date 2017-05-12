@@ -2,8 +2,8 @@
 @startuml
 autonumber
 title Establish Device Identity
-participant "On-boarding Device\n(UUID B0B0XXXX-...)" as OT
-participant "New Device\n(UUID A71C3XXX-...)" as ND
+participant "On-boarding Device\n(UUID B0Bxxxxx-...)" as OT
+participant "New Device\n(UUID A71C3xxx-...)" as ND
 
 group Establish Device Identifiers
 note over OT, ND
@@ -45,7 +45,7 @@ Onboarding device re-reads /doxm to get the new device's persistent UUID.
 end note
 
 OT->ND: GET /oic/sec/doxm
-ND->OT: RSP {...,"deviceuuid":"A71C3XXX-...",...}
+ND->OT: RSP {...,"deviceuuid":"A71C3xxx-...",...}
 
 end
 @enduml

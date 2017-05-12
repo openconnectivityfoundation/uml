@@ -2,16 +2,16 @@
 @startuml
 autonumber
 title Owner Credential (OC) Assignment Sequence
-participant "On-boarding Device\n(UUID B0B0XXXX-...)" as OT
-participant "New Device\n(UUID A71C3XXX-...)" as ND
+participant "On-boarding Device\n(UUID B0Bxxxxx-...)" as OT
+participant "New Device\n(UUID A71C3xxx-...)" as ND
 
 group Symmetric Owner Credential
 note over OT, ND
 Derive a shared symmetric key as the credential for subsequent connections with the on-boarding device. (If using symmetric credentials)
 end note
-OT->OT: SharedKey = PRF (MasterSecret, "oic.sec.oxm.mfgcert", "uuid":"B0B0XXXX-...", "uuid":"A71C3XXX-...", "68")
-OT->OT: Generate {..., "credtype":1, "subjectuuid":"A71C3XXX-...", "credid":1,\n "privatedata":{"encoding":"oic.sec.encoding.base64", "data":'<SharedKey>'},...}
-OT->ND: POST /oic/sec/cred {"creds":[{..., "credtype":1, "subjectuuid":"B0B0XXXX-...", "credid":1,\n "privatedata":{"encoding":"oic.sec.encoding.base64", "data":'<empty>'},...}],...}
+OT->OT: SharedKey = PRF (MasterSecret, "oic.sec.oxm.mfgcert", "uuid":"B0Bxxxxx-...", "uuid":"A71C3xxx-...", "68")
+OT->OT: Generate {..., "credtype":1, "subjectuuid":"A71C3xxx-...", "credid":1,\n "privatedata":{"encoding":"oic.sec.encoding.base64", "data":'<SharedKey>'},...}
+OT->ND: POST /oic/sec/cred {"creds":[{..., "credtype":1, "subjectuuid":"B0Bxxxxx-...", "credid":1,\n "privatedata":{"encoding":"oic.sec.encoding.base64", "data":""},...}],...}
 ND->ND: Derive SharedKey Locally
 ND->ND: Replace the "privatedata" \nof received credential
 ND->OT: RSP 2.04

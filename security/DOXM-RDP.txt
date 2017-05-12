@@ -13,15 +13,14 @@ end note
 OT->ND: POST /oic/sec/doxm {...,"oxmsel":1,...}
 ND->OT: RSP 2.04
 
-OT->ND: ClientHello(TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256)
-ND->OT: HelloVerifyRequest(cookie)
-OT->ND: ClientHello(TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256,cookie)
-ND->OT: ServerHello(TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256)\nServerKeyExchange(ECDH PublicKey + ECC Curve Param)\nServerHelloDone()
-
 note over OT, ND
 Compute PPSK following RFC 2898: PPSK = PBKDF2(PRF, PIN, NewDeviceID, c, DkLen)
 end note
 
+OT->ND: ClientHello(TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256)
+ND->OT: HelloVerifyRequest(cookie)
+OT->ND: ClientHello(TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256,cookie)
+ND->OT: ServerHello(TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256)\nServerKeyExchange(ECDH PublicKey + ECC Curve Param)\nServerHelloDone()
 OT->ND: ClientKeyExchange(ECDH PublicKey)\nChangeCipherSpec + Finish
 ND->OT:	ChangeCipherSpec + Finish
 end

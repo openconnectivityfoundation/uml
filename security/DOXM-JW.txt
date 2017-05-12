@@ -2,8 +2,8 @@
 @startuml
 autonumber
 title Perform Just-Works Owner Transfer Method
-participant "On-boarding Device\n(UUID B0B0XXXX-...)" as OT
-participant "New Device\n(UUID A71C3XXX-...)" as ND
+participant "On-boarding Device\n(UUID B0B0xxxx-...)" as OT
+participant "New Device\n(UUID A71C3xxx-...)" as ND
 
 group Execute Just Works Owner Transfer Method
 note over OT, ND

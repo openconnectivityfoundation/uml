@@ -2,10 +2,10 @@
 @startuml
 autonumber
 title Summary of Onboarding Process
-participant "On-boarding Device\n(UUID B0B0XXXX-...)" as OT
-participant "CMS Device\n(UUID C85XXXXX-...)" as CM
-participant "AMS Device\n(UUID A85XXXXX-...)" as AM
-participant "New Device\n(UUID A71C3XXX-...)" as ND
+participant "On-boarding Device\n(UUID B0Bxxxxx-...)" as OT
+participant "CMS Device\n(UUID C85xxxxx-...)" as CM
+participant "AMS Device\n(UUID A85xxxxx-...)" as AM
+participant "New Device\n(UUID A71C3xxx-...)" as ND
 
 group Discover New Devices
 note over OT, ND

@@ -10,7 +10,7 @@ note over OT, ND
 Find new devices that are unowned. Device identifier may be obfuscated for privacy (not show).
 end note
 OT->ND: GET /oic/sec/doxm?owned=FALSE
-ND->OT: RSP {...,"oxms":[0,1,2,...], "owned":FALSE, "deviceuuid":"A71C3xxx-...}
+ND->OT: RSP {...,"oxms":[0,1,2,...], "owned":FALSE, "deviceuuid":"FA1CExxx-...}
 end
 
 @enduml
